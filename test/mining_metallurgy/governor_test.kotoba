@@ -67,6 +67,76 @@
       (is (:escalate? result))
       (is (not (:hard? result))))))
 
+(deftest confidence-floor-is-a-floor
+  ;; CLAUDE.md の 5 問目（ADR-2608136000）——「通る例も落ちる例も在ったが、
+  ;; 境界ちょうどのケースが無かった」。この suite は 0.5（escalate）と
+  ;; 0.8 / 0.95（ok）を持っていて、**0.6 ちょうどを持っていなかった**。
+  ;; 実測 2026-09-11: `(< conf confidence-floor)` を `<=` に滑らせても
+  ;; 8 tests / 29 assertions はそのまま緑だった。比較を持つ検査には
+  ;; 境界ちょうどの入力を 1 つ置く。
+  (testing "confidence exactly at the floor is admitted, not escalated"
+    (let [s (store/mem-store)
+          _ (store/register-project! s {:project-id "proj1" :name "Test Site"})
+          req {:project-id "proj1"}
+          prop {:op :draft-test-record :effect :propose
+                :confidence gov/confidence-floor}
+          result (gov/check req nil prop s)]
+      (is (:ok? result))
+      (is (not (:escalate? result))))))
+
+(deftest verdict-dispositions-are-mutually-exclusive
+  ;; verdict は `:decide` が 1 本の経路を選ぶための値なので、2 つの
+  ;; disposition が同時に真になってはならない。既存の検査は自分が気にする
+  ;; field だけを assert していたため、**3 つの反転が緑のまま通っていた**
+  ;; （実測 2026-09-11、いずれも 8 tests / 29 assertions / 0 failures）:
+  ;;
+  ;;   :ok? から (not safety-op?) を落とす   -> 誰も見ていなかった
+  ;;   :ok? から (not low?) を落とす          -> 誰も見ていなかった
+  ;;   :escalate? から (not hard?) を落とす   -> 誰も見ていなかった
+  ;;
+  ;; 3 番目が最も重い。governor の docstring は hard を "never overridable"
+  ;; と書いているが、:hard? と :escalate? が同時に真な verdict は、まさに
+  ;; その一文が禁じている状態 —— hold すべき提案について人に sign-off を
+  ;; 求めることになる。:decide は :hard? を先に見るので **routing は生き残り、
+  ;; 矛盾だけが verdict の中に残る**。だから actor 経由では観測できず、
+  ;; verdict 自身に対して問う必要がある。
+  (testing "a hard block is never also an escalation"
+    (let [s (store/mem-store)
+          req {:project-id "unregistered"}
+          prop {:op :draft-test-record :effect :propose :confidence 0.1}
+          result (gov/check req nil prop s)]
+      (is (:hard? result))
+      (is (not (:escalate? result)))
+      (is (not (:ok? result)))))
+
+  (testing "an operator-class op is held even when confidence is high"
+    (let [s (store/mem-store)
+          _ (store/register-project! s {:project-id "proj1" :name "Test Site"})
+          req {:project-id "proj1"}
+          prop {:op :blast :effect :propose :confidence 1.0}
+          result (gov/check req nil prop s)]
+      (is (:hard? result))
+      (is (not (:escalate? result)))
+      (is (not (:ok? result)))))
+
+  (testing "an escalated safety hazard is not also ok"
+    (let [s (store/mem-store)
+          _ (store/register-project! s {:project-id "proj1" :name "Test Site"})
+          req {:project-id "proj1"}
+          prop {:op :flag-safety-hazard :effect :propose :confidence 0.95}
+          result (gov/check req nil prop s)]
+      (is (:escalate? result))
+      (is (not (:ok? result)))))
+
+  (testing "an escalated low-confidence proposal is not also ok"
+    (let [s (store/mem-store)
+          _ (store/register-project! s {:project-id "proj1" :name "Test Site"})
+          req {:project-id "proj1"}
+          prop {:op :draft-test-record :effect :propose :confidence 0.5}
+          result (gov/check req nil prop s)]
+      (is (:escalate? result))
+      (is (not (:ok? result))))))
+
 (deftest ok-case
   (testing "valid proposal with high confidence and allowed op succeeds"
     (let [s (store/mem-store)

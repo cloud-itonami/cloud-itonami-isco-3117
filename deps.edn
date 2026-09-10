@@ -7,11 +7,36 @@
   ;; could not be linted at all -- across this fleet an absent or broken :lint
   ;; alias is what let misplaced docstrings, dead code and even a false-green
   ;; test verdict survive unreported (cloud-itonami-isic-561/563/920).
-  :lint {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2024.11.14"}}
-         :main-opts    ["-m" "clj-kondo.main"
-                        "--lint" "src" "test"
-                        "--fail-level" "error"]}
-  :test {:extra-paths ["test"]
-         :extra-deps {io.github.cognitect-labs/test-runner
-                      {:git/tag "v0.5.1" :git/sha "dfb30dd6605cb6c0efc275e1df1736f6e90d4d73"}}
-         :main-opts ["-m" "cognitect.test-runner"]}}}
+  ;;
+  ;; This alias reads NOTHING since the rename to `.kotoba` (34db00d): clj-kondo
+  ;; does not scan that extension, so it went from 2 warnings in 615ms to
+  ;; `errors: 0, warnings: 0` in 5ms -- a check that inspected no files
+  ;; returning what a clean check returns, the same shape :test had. It is kept
+  ;; pointed at src/test because that is where the sources will be again if the
+  ;; rename is ever reverted, and it refuses in the meantime rather than
+  ;; reporting clean. The working command stages the sources first:
+  ;;
+  ;;     nbb test/run_suite.cljs --lint
+  ;;
+  ;; Measured 2026-09-11: against the staged tree clj-kondo recovers exactly
+  ;; the 2 warnings it reported at 22e49e2.
+  :lint {:main-opts
+         ["-e"
+          "(binding [*out* *err*] (println \"REFUSED: clj-kondo does not read .kotoba, so this alias would lint zero files and report `errors: 0, warnings: 0`. Run: nbb test/run_suite.cljs --lint\")) (System/exit 2)"]}
+
+  ;; This alias no longer runs the suite -- it refuses, loudly.
+  ;;
+  ;; The suite lives in `.kotoba` files, which clojure.tools.namespace does not
+  ;; scan, so `cognitect.test-runner` collected nothing here and reported
+  ;; `Ran 0 tests containing 0 assertions. 0 failures, 0 errors.` with exit 0 --
+  ;; the same value it gave for 8 green tests the commit before. Leaving the
+  ;; alias pointed at that runner would leave a documented command that answers
+  ;; `pass` without looking, which is the defect, not a symptom of it. Deleting
+  ;; the alias instead would drop `clojure -M:test` into a REPL, which is
+  ;; quieter still.
+  ;;
+  ;; The suite itself runs on nbb (ADR-2609070200 retires `clojure -M` for build
+  ;; and test): `nbb test/run_suite.cljs`.
+  :test {:main-opts
+         ["-e"
+          "(binding [*out* *err*] (println \"REFUSED: this suite lives in .kotoba files, which clojure.tools.namespace cannot see. Between 2026-09-10 and 2026-09-11 this command exited 0 having run zero tests. Run: nbb test/run_suite.cljs\")) (System/exit 2)"]}}}
