@@ -6,8 +6,8 @@ Thank you for your interest in contributing to this project. We welcome contribu
 
 1. Fork the repository and clone your fork.
 2. Create a new branch for your work.
-3. Install dependencies: `clojure -M:deps`
-4. Run tests: `clojure -M:test`
+3. Install dependencies: `kbb -M:deps`
+4. Run tests: `kbb -M:test`
 
 ## Contribution Process
 

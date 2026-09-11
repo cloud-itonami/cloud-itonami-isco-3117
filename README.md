@@ -29,15 +29,15 @@ Built as a `langgraph-clj` StateGraph actor per ADR-2607011000. One graph run = 
 ### Test & Deploy
 
 ```bash
-nbb test/run_suite.cljk          # Run the suite
-nbb test/run_suite.cljk --lint   # ... and lint the same sources
+kbb --backend sci test/run_suite.cljk          # Run the suite
+kbb --backend sci test/run_suite.cljk --lint   # ... and lint the same sources
 ```
 
 The suite is **10 tests / 41 assertions**. That sentence is not decoration:
 `test/run_suite.cljk` reads it and refuses (exit 2) any run that comes in
 under it, so the count cannot go stale without turning the run red.
 
-`clojure -M:test` no longer runs this suite and refuses rather than
+`kbb -M:test` no longer runs this suite and refuses rather than
 answering. The sources are `.kotoba`, which `clojure.tools.namespace` does
 not scan, so between 2026-09-10 and 2026-09-11 that command reported
 `Ran 0 tests containing 0 assertions. 0 failures, 0 errors.` and exited 0 —
