@@ -29,7 +29,7 @@
 
   ## What this does
 
-  Modeled on `orgs/cloud-itonami/cloud-itonami-isco-2519`'s `test/run_suite.cljs`,
+  Modeled on `orgs/cloud-itonami/cloud-itonami-isco-2519`'s `test/run_suite.cljk`,
   itself modeled on `orgs/cloud-itonami/actor-crew/scripts/run_contract_suite.cljs`,
   both written for this same defect. The `.kotoba` files are Clojure-shaped
   text, so they are copied into a scratch directory under a `.cljc` extension
@@ -68,7 +68,7 @@
        under the floor. Never a pass.
 
   Usage:
-    nbb test/run_suite.cljs [--dep-src <name>=<path>] [--keep] [--lint]"
+    nbb test/run_suite.cljk [--dep-src <name>=<path>] [--keep] [--lint]"
   (:require ["node:fs" :as fs]
             ["node:os" :as os]
             ["node:path" :as path]

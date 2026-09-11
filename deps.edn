@@ -16,13 +16,13 @@
   ;; rename is ever reverted, and it refuses in the meantime rather than
   ;; reporting clean. The working command stages the sources first:
   ;;
-  ;;     nbb test/run_suite.cljs --lint
+  ;;     nbb test/run_suite.cljk --lint
   ;;
   ;; Measured 2026-09-11: against the staged tree clj-kondo recovers exactly
   ;; the 2 warnings it reported at 22e49e2.
   :lint {:main-opts
          ["-e"
-          "(binding [*out* *err*] (println \"REFUSED: clj-kondo does not read .kotoba, so this alias would lint zero files and report `errors: 0, warnings: 0`. Run: nbb test/run_suite.cljs --lint\")) (System/exit 2)"]}
+          "(binding [*out* *err*] (println \"REFUSED: clj-kondo does not read .kotoba, so this alias would lint zero files and report `errors: 0, warnings: 0`. Run: nbb test/run_suite.cljk --lint\")) (System/exit 2)"]}
 
   ;; This alias no longer runs the suite -- it refuses, loudly.
   ;;
@@ -36,7 +36,7 @@
   ;; quieter still.
   ;;
   ;; The suite itself runs on nbb (ADR-2609070200 retires `clojure -M` for build
-  ;; and test): `nbb test/run_suite.cljs`.
+  ;; and test): `nbb test/run_suite.cljk`.
   :test {:main-opts
          ["-e"
-          "(binding [*out* *err*] (println \"REFUSED: this suite lives in .kotoba files, which clojure.tools.namespace cannot see. Between 2026-09-10 and 2026-09-11 this command exited 0 having run zero tests. Run: nbb test/run_suite.cljs\")) (System/exit 2)"]}}}
+          "(binding [*out* *err*] (println \"REFUSED: this suite lives in .kotoba files, which clojure.tools.namespace cannot see. Between 2026-09-10 and 2026-09-11 this command exited 0 having run zero tests. Run: nbb test/run_suite.cljk\")) (System/exit 2)"]}}}
