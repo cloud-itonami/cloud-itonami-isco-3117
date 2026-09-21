@@ -98,11 +98,11 @@
   either of them (classpath with langgraph alone, and with langgraph+langchain,
   both exit 1)."
   [{:name "langgraph" :path ["kotoba-lang" "langgraph" "src"]
-    :probe ["langgraph" "graph.cljc"]}
+    :probe ["langgraph" "graph.cljk"]}
    {:name "langchain" :path ["kotoba-lang" "langchain" "src"]
-    :probe ["langchain" "runnable.cljc"]}
+    :probe ["langchain" "runnable.cljk"]}
    {:name "text" :path ["kotoba-lang" "text" "src"]
-    :probe ["kotoba" "lang" "text.cljc"]}])
+    :probe ["kotoba" "lang" "text.cljk"]}])
 
 (defn- refuse [& msg]
   (binding [*print-fn* *print-err-fn*]
