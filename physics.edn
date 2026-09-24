@@ -1,0 +1,43 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:physics` runs it.
+;;
+;; README: an actor for field data collection, lab testing and inspection
+;; support for mining and metallurgical technicians (ISCO 3117) -- ore/metal
+;; sample test and assay data. Under the cloud-itonami robot premise, its
+;; physical work is carrying ore sample bags from the drill site over rough
+;; ground, tensile-testing a metal coupon, and heating a fire-assay crucible.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isco-3117"
+ :cases
+ [{:id :ore-sample-bags-to-vehicle
+   :kind :transport
+   :procedure "tracked carrier hauls ore sample bags 40 m over rough ground from the drill pad to the lab vehicle"
+   :params {:mass-kg 60.0 :distance-m 40.0 :v-max-mps 0.8 :a-max-mps2 0.5
+            :brake-decel-mps2 0.8 :drive-force-n 150.0 :crr 0.08
+            :cog-height-m 0.50 :support-half-length-m 0.35}
+   :sweep {:param :payload-kg :values [10.0 30.0 60.0 90.0 120.0]}
+   :quantity :cycle-time-s
+   :limit {:max 70.0 :basis "estimate: one pad-to-vehicle leg short enough to keep pace with the drill's sample output"}
+   :boundary {:lo 1.0 :hi 130.0}}
+  {:id :alloy-coupon-tensile
+   :kind :material
+   :procedure "tensile test on an aluminium-alloy coupon (50 mm2, E 70 GPa, yield 240 MPa) at increasing load"
+   :params {:area-m2 5.0e-5 :youngs-modulus-pa 70.0e9 :yield-stress-pa 240.0e6
+            :hardening-pa 0.7e9 :density-kg-m3 2700.0}
+   :sweep {:param :max-force-n :values [6000.0 9000.0 11000.0 12500.0 14000.0]}
+   :quantity :final-strain
+   :limit {:max 0.0054 :basis "estimate: total strain at the 0.2 % offset for a 240 MPa, 70 GPa alloy (240/70000 + 0.002)"}
+   :boundary {:lo 2000.0 :hi 20000.0}}
+  {:id :fire-assay-crucible-heatup
+   :kind :thermal
+   :procedure "8 mm fireclay crucible goes into a 1050 C assay furnace; the charge-side wall must be hot before fusion is timed"
+   :params {:thickness-m 0.008 :conductivity-w-mk 1.0 :density-kg-m3 2000.0 :specific-heat-j-kgk 1000.0
+            :t0-c 25.0 :t-hot-c 1050.0 :h-front-w-m2k 50.0 :t-back-ambient-c 25.0 :h-back-w-m2k 5.0
+            :threshold-c 900.0 :nodes 11}
+   :sweep {:param :duration-s :values [120.0 300.0 600.0 900.0 1200.0]}
+   :quantity :final-back-c
+   :limit {:min 900.0 :basis "estimate: charge-side wall above ~900 C before fusion time is counted; furnace-side coefficient 50 W/m2K lumps radiation"}
+   :boundary {:lo 60.0 :hi 3000.0}}]}
