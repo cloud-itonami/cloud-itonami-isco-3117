@@ -68,7 +68,7 @@
       (is (not (:hard? result))))))
 
 (deftest confidence-floor-is-a-floor
-  ;; CLAUDE.md の 5 問目（ADR-2608136000）——「通る例も落ちる例も在ったが、
+  ;; AGENTS.md の 5 問目（ADR-2608136000）——「通る例も落ちる例も在ったが、
   ;; 境界ちょうどのケースが無かった」。この suite は 0.5（escalate）と
   ;; 0.8 / 0.95（ok）を持っていて、**0.6 ちょうどを持っていなかった**。
   ;; 実測 2026-09-11: `(< conf confidence-floor)` を `<=` に滑らせても
