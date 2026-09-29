@@ -16,7 +16,7 @@
 
   One commit earlier the same command reported 8 tests / 29 assertions — also
   exit 0. **A suite that could not run returned the same value as a suite that
-  ran and passed.** That is questions 2 and 4 of the eight in CLAUDE.md.
+  ran and passed.** That is questions 2 and 4 of the eight in AGENTS.md.
   Nothing in this repository could tell the two apart, so the break was
   silent: the governor's hard blocks on extraction, blasting and ore-grade
   targeting — the whole reason this actor is separate from a mining
@@ -38,7 +38,7 @@
   holds.
 
   nbb rather than the JVM because ADR-2609070200 retires `kbb -M` for
-  build and test, and because CLAUDE.md ranks nbb above the JVM. Measured
+  build and test, and because AGENTS.md ranks nbb above the JVM. Measured
   2026-09-11: this suite gives the same 8 tests / 29 assertions on both.
 
   ## The floor
